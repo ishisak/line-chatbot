@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
@@ -54,10 +55,11 @@ public class EchoApplication {
     }
 
     @EventMapping
-    public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws Exception {
+    public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws InterruptedException, ExecutionException {
         System.out.println("event: " + event);
-        TextMessageContent message = event.getMessage();
-        handleTextContent(event.getReplyToken(), event, message);
+        Message message = new TextMessage(event.getMessage().getText());
+        this.reply(event.getReplyToken(), message);
+//        return new TextMessage(event.getMessage().getText());
     }
 
     @EventMapping
@@ -66,7 +68,7 @@ public class EchoApplication {
     }
     
     private void handleTextContent(String replyToken, Event event, TextMessageContent content) throws Exception {
-        String imageUrl = "http://www.recruit.jp/meet_recruit/meet_recruit/upload/fb12_main.jpg";
+        String imageUrl = createUri("/static/buttons/1040.jpg");
         CarouselTemplate carouselTemplate = new CarouselTemplate(
                 Arrays.asList(
                         new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
@@ -99,5 +101,11 @@ public class EchoApplication {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    private static String createUri(String path) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                                          .path(path).build()
+                                          .toUriString();
     }
 }
