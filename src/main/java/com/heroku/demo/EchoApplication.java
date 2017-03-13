@@ -55,11 +55,10 @@ public class EchoApplication {
     }
 
     @EventMapping
-    public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws InterruptedException, ExecutionException {
+    public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws Exception {
         System.out.println("event: " + event);
-        Message message = new TextMessage(event.getMessage().getText());
-        this.reply(event.getReplyToken(), message);
-//        return new TextMessage(event.getMessage().getText());
+        TextMessageContent message = event.getMessage();
+        handleTextContent(event.getReplyToken(), event, message);
     }
 
     @EventMapping
