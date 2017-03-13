@@ -16,31 +16,88 @@
 
 package com.heroku.demo;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.linecorp.bot.client.LineMessagingClient;
+import com.linecorp.bot.model.ReplyMessage;
+import com.linecorp.bot.model.action.MessageAction;
+import com.linecorp.bot.model.action.PostbackAction;
+import com.linecorp.bot.model.action.URIAction;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
+import com.linecorp.bot.model.message.Message;
+import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
+import com.linecorp.bot.model.message.template.CarouselColumn;
+import com.linecorp.bot.model.message.template.CarouselTemplate;
+import com.linecorp.bot.model.response.BotApiResponse;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
+
 
 @SpringBootApplication
 @LineMessageHandler
 public class EchoApplication {
+    @Autowired
+    private LineMessagingClient lineMessagingClient;
+
     public static void main(String[] args) {
         SpringApplication.run(EchoApplication.class, args);
     }
 
     @EventMapping
-    public TextMessage handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
+    public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws Exception {
         System.out.println("event: " + event);
-        return new TextMessage(event.getMessage().getText());
+        TextMessageContent message = event.getMessage();
+        handleTextContent(event.getReplyToken(), event, message);
     }
 
     @EventMapping
     public void handleDefaultMessageEvent(Event event) {
         System.out.println("event: " + event);
+    }
+    
+    private void handleTextContent(String replyToken, Event event, TextMessageContent content) throws Exception {
+        String imageUrl = "http://www.recruit.jp/meet_recruit/meet_recruit/upload/fb12_main.jpg";
+        CarouselTemplate carouselTemplate = new CarouselTemplate(
+                Arrays.asList(
+                        new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
+                                new URIAction("Go to line.me",
+                                              "https://line.me"),
+                                new PostbackAction("Say hello1",
+                                                   "hello こんにちは")
+                        )),
+                        new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
+                                new PostbackAction("言 hello2",
+                                                   "hello こんにちは",
+                                                   "hello こんにちは"),
+                                new MessageAction("Say message",
+                                                  "Rice=米")
+                        ))
+                ));
+        TemplateMessage templateMessage = new TemplateMessage("Carousel alt text", carouselTemplate);
+        this.reply(replyToken, templateMessage); 
+    }
+    
+    private void reply(String replyToken, Message message) {
+        reply(replyToken, Collections.singletonList(message));
+    }
+
+    private void reply(String replyToken, List<Message> messages) {
+        try {
+            BotApiResponse apiResponse = lineMessagingClient
+                    .replyMessage(new ReplyMessage(replyToken, messages))
+                    .get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
