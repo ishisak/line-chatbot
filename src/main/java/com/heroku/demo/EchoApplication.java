@@ -16,6 +16,7 @@
 
 package com.heroku.demo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
+import com.linecorp.bot.model.action.Action;
 import com.linecorp.bot.model.action.MessageAction;
 import com.linecorp.bot.model.action.PostbackAction;
 import com.linecorp.bot.model.action.URIAction;
@@ -68,21 +70,18 @@ public class EchoApplication {
     
     private void handleTextContent(String replyToken, Event event, TextMessageContent content) throws Exception {
         String imageUrl = "https://imgfp.hotp.jp/IMGH/28/62/P026732862/P026732862_238.jpg";
+        String imageUrl2 = "https://imgfp.hotp.jp/IMGH/04/68/P020950468/P020950468_238.jpg";
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new URIAction("詳しく見る",
+                "https://www.recruit-lifestyle.co.jp/recruit/career/interview/watase"));
+        List<Action> actions2 = new ArrayList<Action>();
+        actions2.add(new URIAction("詳しく見る",
+                "http://www.recruit.jp/meet_recruit/2016/03/post-5.html"));
+
         CarouselTemplate carouselTemplate = new CarouselTemplate(
                 Arrays.asList(
-                        new CarouselColumn(imageUrl, "Airわたせ", "超一流", Arrays.asList(
-                                new URIAction("詳しく見る",
-                                              "http://www.recruit.jp/meet_recruit/2016/03/post-5.html"),
-                                new PostbackAction("Say hello1",
-                                                   "hello こんにちは")
-                        )),
-                        new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
-                                new PostbackAction("言 hello2",
-                                                   "hello こんにちは",
-                                                   "hello こんにちは"),
-                                new MessageAction("Say message",
-                                                  "Rice=米")
-                        ))
+                        new CarouselColumn(imageUrl, "わっちさん", "すごい", actions2),
+                        new CarouselColumn(imageUrl2, "わっちさん", "ごいすー", actions)
                 ));
         TemplateMessage templateMessage = new TemplateMessage("Carousel alt text", carouselTemplate);
         this.reply(replyToken, templateMessage); 
