@@ -67,12 +67,12 @@ public class EchoApplication {
     }
     
     private void handleTextContent(String replyToken, Event event, TextMessageContent content) throws Exception {
-        String imageUrl = createUri("/static/buttons/1040.jpg");
+        String imageUrl = "https://imgfp.hotp.jp/IMGH/28/62/P026732862/P026732862_238.jpg";
         CarouselTemplate carouselTemplate = new CarouselTemplate(
                 Arrays.asList(
-                        new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
-                                new URIAction("Go to line.me",
-                                              "https://line.me"),
+                        new CarouselColumn(imageUrl, "Airわたせ", "超一流", Arrays.asList(
+                                new URIAction("詳しく見る",
+                                              "http://www.recruit.jp/meet_recruit/2016/03/post-5.html"),
                                 new PostbackAction("Say hello1",
                                                    "hello こんにちは")
                         )),
